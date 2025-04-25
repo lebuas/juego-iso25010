@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Engineer ISO Game</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: sans-serif;
+        background: #f0f0f0;
+        overflow: hidden;
+      }
+      #startScreen,
+      #summaryScreen {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background-color: #ffffff;
+        z-index: 10;
+        padding: 20px;
+        text-align: center;
+      }
+      .intro {
+        background: #e3f2fd;
+        border-left: 6px solid #1976d2;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        max-width: 80%;
+      }
+      .intro h2 {
+        margin: 0 0 10px;
+        color: #1976d2;
+      }
+      .intro p {
+        margin: 0 0 10px;
+        color: #333;
+      }
+      .intro ul {
+        text-align: left;
+        padding-left: 1.2em;
+        margin: 0;
+        color: #555;
+      }
+      #startScreen button,
+      #summaryScreen button {
+        padding: 1rem 2rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      #gameArea {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background: #e3f2fd;
+      }
+      #questionBox {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 5;
+        text-align: center;
+      }
+      #questionText {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 10px;
+      }
+      #answersText {
+        font-size: 1rem;
+        color: #555;
+      }
+      #progressContainer {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        background-color: #ddd;
+        height: 25px;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        box-sizing: border-box;
+        z-index: 10;
+      }
+      #progressBar {
+        height: 100%;
+        width: 0%;
+        background-color: red;
+        transition:
+          width 0.3s ease,
+          background-color 0.3s ease;
+      }
+      #engineer {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 48px;
+        transition: bottom 0.2s ease;
+        z-index: 4;
+        bottom: 50%;
+      }
+      .option {
+        position: absolute;
+        bottom: 60px;
+        font-size: 36px;
+        transition: left 0.02s linear;
+      }
+      #ground {
+        position: absolute;
+        bottom: 0;
+        height: 60px;
+        width: 100%;
+        background-color: #4caf50;
+      }
+      .collisionEffect {
+        position: absolute;
+        font-size: 40px;
+        z-index: 10;
+        animation: pop 0.5s ease-out;
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 11;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        border-radius: 10px;
+        text-align: center;
+      }
+      .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close-button:hover,
+      .close-button:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      #feedback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        font-weight: bold;
+        display: none;
+        z-index: 12;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="startScreen">
+      <h1>🎓 Evaluación ISO/IEC 25010</h1>
+      <h2>Integrantes:</h2>
+      <ul style="list-style: none">
+        <li>Leymar Buenventura Asprilla</li>
+        <li>Jose David Peña Gomez</li>
+      </ul>
+      <div class="intro">
+        <h2>¿Qué es ISO/IEC 25010?</h2>
+        <p>
+          ISO/IEC 25010 es un estándar internacional que define un modelo de
+          calidad de software, dividido en 8 características clave:
+        </p>
+        <ul>
+          <li><strong>Funcionalidad:</strong> Cumplimiento de requisitos.</li>
+          <li>
+            <strong>Fiabilidad:</strong> Capacidad de funcionar bajo condiciones
+            específicas.
+          </li>
+          <li><strong>Eficiencia:</strong> Uso óptimo de recursos.</li>
+          <li>
+            <strong>Usabilidad:</strong> Facilidad de uso para el usuario.
+          </li>
+          <li><strong>Mantenibilidad:</strong> Facilidad de modificación.</li>
+          <li>
+            <strong>Portabilidad:</strong> Adaptación a diferentes entornos.
+          </li>
+          <li>
+            <strong>Compatibilidad:</strong> Convivencia con otros sistemas.
+          </li>
+          <li><strong>Seguridad:</strong> Protección de la información.</li>
+        </ul>
+      </div>
+      <p><strong>Dinámica del juego:</strong></p>
+      <ul
+        style="text-align: left; margin: 0; padding-left: 1.2em; max-width: 80%"
+      >
+        <li>Presiona <strong>Iniciar Juego</strong> para comenzar.</li>
+        <li>Usa la <strong>barra espaciadora</strong> para saltar.</li>
+        <li>Toca la opción correcta (🅰️🅱️🅲️🅳️) para sumar progreso.</li>
+        <li>Las respuestas incorrectas restan progreso.</li>
+        <li>Recoge la ⚙️ para ver información adicional en un modal.</li>
+        <li>El juego termina al responder todas las preguntas.</li>
+      </ul>
+      <button id="startBtn">Iniciar Juego</button>
+    </div>
+
+    <div id="summaryScreen" style="display: none">
+      <h1>🎉 ¡Juego terminado!</h1>
+      <p id="summaryText"></p>
+      <button id="restartBtn">Jugar de nuevo</button>
+    </div>
+
+    <div id="gameArea">
+      <div id="progressContainer">
+        <div id="progressBar"></div>
+      </div>
+      <div id="questionBox">
+        <div id="questionText"></div>
+        <div id="answersText"></div>
+      </div>
+      <div id="engineer">👨‍💻</div>
+      <div id="ground"></div>
+      <div id="feedback"></div>
+    </div>
+
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <div id="modalText"></div>
+        <div id="modalLink"></div>
+      </div>
+    </div>
+    <script id="questionsData" type="application/json">
+      [
+        {
+          "question": "¿Cuál es una de las características de calidad según ISO/IEC 25010?",
+          "answers": {
+            "A": "Compatibilidad",
+            "B": "Velocidad del CPU",
+            "C": "Número de usuarios",
+            "D": "Consumo de batería"
+          },
+          "correct": "A",
+          "modalMessage": "¡Encontraste la llave para la compatibilidad! Esta es una característica clave de ISO/IEC 25010.",
+          "modalLink": {
+            "text": "Más sobre Compatibilidad",
+            "url": "https://es.wikipedia.org/wiki/Compatibilidad"
+          }
+        },
+        {
+          "question": "¿Qué evalúa la característica de mantenibilidad?",
+          "answers": {
+            "A": "Estética de la interfaz",
+            "B": "Capacidad de adaptación",
+            "C": "Facilidad de modificación",
+            "D": "Número de funcionalidades"
+          },
+          "correct": "C",
+          "modalMessage": "La mantenibilidad incluye varios factores que permiten que el software se pueda modificar de manera eficiente, sin afectar negativamente otras funcionalidades, incluyendo correcciones, mejoras o adaptaciones."
+        },
+        {
+          "question": "¿Qué representa la característica de usabilidad?",
+          "answers": {
+            "A": "Nivel de seguridad",
+            "B": "Experiencia del usuario",
+            "C": "Tiempo de carga",
+            "D": "Velocidad de red"
+          },
+          "correct": "B",
+          "modalMessage": "La usabilidad se centra en cómo los usuarios interactúan con el sistema, buscando facilidad de uso, aprendizaje intuitivo, y satisfacción general.",
+          "modalLink": {
+            "text": "Leer más sobre Usabilidad",
+            "url": "https://es.wikipedia.org/wiki/Usabilidad"
+          }
+        },
+        {
+          "question": "¿Cuál es el propósito de la característica de seguridad?",
+          "answers": {
+            "A": "Facilidad de aprendizaje",
+            "B": "Protección de la información",
+            "C": "Eficiencia en el uso de recursos",
+            "D": "Capacidad de ser transferido a diferentes entornos"
+          },
+          "correct": "B",
+          "modalMessage": "La seguridad se centra en la capacidad del software para proteger datos y mantener su confidencialidad, integridad y disponibilidad ante amenazas internas o externas."
+        },
+        {
+          "question": "¿Qué mide la característica de eficiencia de rendimiento?",
+          "answers": {
+            "A": "Tamaño del software",
+            "B": "Rendimiento en tareas críticas",
+            "C": "Uso de hardware específico",
+            "D": "Consumo energético"
+          },
+          "correct": "B",
+          "modalMessage": "Esta característica analiza el comportamiento del sistema bajo distintas condiciones de uso, especialmente en cuanto a tiempos de respuesta y consumo de recursos."
+        },
+        {
+          "question": "¿Qué característica indica la facilidad con que el sistema puede ser trasladado a otro entorno?",
+          "answers": {
+            "A": "Compatibilidad",
+            "B": "Adaptabilidad",
+            "C": "Portabilidad",
+            "D": "Seguridad"
+          },
+          "correct": "C",
+          "modalLink": {
+            "text": "Ver más sobre Portabilidad",
+            "url": "https://es.wikipedia.org/wiki/Portabilidad_(inform%C3%A1tica)"
+          }
+        },
+        {
+          "question": "¿Qué subcaracterística de la fiabilidad se refiere al tiempo en que el sistema permanece operativo sin fallar?",
+          "answers": {
+            "A": "Disponibilidad",
+            "B": "Recuperabilidad",
+            "C": "Madurez",
+            "D": "Tolerancia a fallos"
+          },
+          "correct": "C",
+          "modalMessage": "La madurez representa la probabilidad de que el software funcione sin fallos bajo condiciones normales durante un período definido."
+        },
+        {
+          "question": "¿Qué subcaracterística de la usabilidad considera la facilidad de aprendizaje del usuario?",
+          "answers": {
+            "A": "Operabilidad",
+            "B": "Aprendizaje",
+            "C": "Estética",
+            "D": "Accesibilidad"
+          },
+          "correct": "B",
+          "modalLink": {
+            "text": "Subcaracterísticas de Usabilidad",
+            "url": "https://es.wikipedia.org/wiki/Usabilidad"
+          }
+        },
+        {
+          "question": "¿Qué mide la subcaracterística de interoperabilidad?",
+          "answers": {
+            "A": "La conexión a internet",
+            "B": "La integración con otros sistemas",
+            "C": "La visualización de datos",
+            "D": "La eficiencia de código"
+          },
+          "correct": "B",
+          "modalMessage": "Interoperabilidad mide la capacidad del software para interactuar con otros productos o sistemas, intercambiando datos y servicios sin restricciones."
+        },
+        {
+          "question": "¿Qué subcaracterística de seguridad se centra en evitar accesos no autorizados?",
+          "answers": {
+            "A": "Integridad",
+            "B": "Autenticación",
+            "C": "Confidencialidad",
+            "D": "Trazabilidad"
+          },
+          "correct": "C",
+          "modalLink": {
+            "text": "Más sobre Confidencialidad",
+            "url": "https://es.wikipedia.org/wiki/Seguridad_de_la_informaci%C3%B3n"
+          }
+        },
+        {
+          "question": "¿Qué subcaracterística de la mantenibilidad permite evaluar la facilidad para localizar errores?",
+          "answers": {
+            "A": "Modificabilidad",
+            "B": "Analizabilidad",
+            "C": "Estabilidad",
+            "D": "Probabilidad"
+          },
+          "correct": "B",
+          "modalMessage": "La analizabilidad mide qué tan fácilmente se pueden diagnosticar defectos o identificar las partes que deben modificarse en el software."
+        },
+        {
+          "question": "¿Qué representa la característica de funcionalidad según ISO/IEC 25010?",
+          "answers": {
+            "A": "El número de características ofrecidas",
+            "B": "El grado en que satisface las necesidades explícitas",
+            "C": "La facilidad de operación",
+            "D": "La estructura interna del código"
+          },
+          "correct": "B"
+        },
+        {
+          "question": "¿Qué evalúa la subcaracterística de comportamiento temporal?",
+          "answers": {
+            "A": "El tiempo de respuesta del sistema",
+            "B": "La velocidad del reloj interno",
+            "C": "La duración de una sesión de usuario",
+            "D": "El número de usuarios conectados"
+          },
+          "correct": "A",
+          "modalLink": {
+            "text": "Eficiencia de rendimiento",
+            "url": "https://es.wikipedia.org/wiki/Rendimiento_(inform%C3%A1tica)"
+          }
+        },
+        {
+          "question": "¿Qué subcaracterística de portabilidad se refiere a la facilidad de instalación?",
+          "answers": {
+            "A": "Adaptabilidad",
+            "B": "Configurabilidad",
+            "C": "Instalabilidad",
+            "D": "Transferibilidad"
+          },
+          "correct": "C",
+          "modalMessage": "La instalabilidad mide el esfuerzo necesario para instalar correctamente el software en un entorno dado."
+        },
+        {
+          "question": "¿Cuál característica está relacionada con evitar consecuencias negativas frente a fallos del sistema?",
+          "answers": {
+            "A": "Eficiencia",
+            "B": "Fiabilidad",
+            "C": "Seguridad",
+            "D": "Mantenibilidad"
+          },
+          "correct": "B"
+        },
+        {
+          "question": "¿Qué característica permite que el software sea usado correctamente en diferentes contextos?",
+          "answers": {
+            "A": "Compatibilidad",
+            "B": "Adaptabilidad",
+            "C": "Portabilidad",
+            "D": "Usabilidad"
+          },
+          "correct": "B"
+        },
+        {
+          "question": "¿Qué mide la subcaracterística de reusabilidad?",
+          "answers": {
+            "A": "Facilidad de analizar errores",
+            "B": "Capacidad de reutilizar componentes",
+            "C": "Velocidad de ejecución",
+            "D": "Accesibilidad para usuarios"
+          },
+          "correct": "B",
+          "modalLink": {
+            "text": "Reusabilidad en ISO 25010",
+            "url": "https://es.wikipedia.org/wiki/Reutilizaci%C3%B3n_de_software"
+          }
+        },
+        {
+          "question": "¿Qué busca la subcaracterística de accesibilidad?",
+          "answers": {
+            "A": "Conectividad total",
+            "B": "Interfaz avanzada",
+            "C": "Inclusión de todos los usuarios",
+            "D": "Modularidad"
+          },
+          "correct": "C",
+          "modalMessage": "La accesibilidad garantiza que personas con diferentes discapacidades puedan interactuar con el software sin barreras."
+        },
+        {
+          "question": "¿Qué significa la trazabilidad en seguridad?",
+          "answers": {
+            "A": "Capacidad de rastrear acciones del usuario",
+            "B": "Seguimiento de actualizaciones",
+            "C": "Control de versiones",
+            "D": "Análisis de riesgos"
+          },
+          "correct": "A",
+          "modalLink": {
+            "text": "Trazabilidad en ISO/IEC 25010",
+            "url": "https://es.wikipedia.org/wiki/Trazabilidad"
+          }
+        },
+        {
+          "question": "¿Cuál es el objetivo del modelo de calidad de producto de ISO/IEC 25010?",
+          "answers": {
+            "A": "Reforzar el hardware",
+            "B": "Evaluar la experiencia de usuario",
+            "C": "Establecer características medibles de calidad",
+            "D": "Implementar buenas prácticas ágiles"
+          },
+          "correct": "C"
+        }
+      ]
+    </script>
+
+    <script>
+      let questions = [];
+      let currentIndex = 0;
+      let progress = 0;
+      let jumping = false;
+      let options = [];
+      let animationFrame;
+
+      const startScreen = document.getElementById("startScreen");
+      const startBtn = document.getElementById("startBtn");
+      const summaryScreen = document.getElementById("summaryScreen");
+      const summaryText = document.getElementById("summaryText");
+      const restartBtn = document.getElementById("restartBtn");
+      const gameArea = document.getElementById("gameArea");
+      const questionText = document.getElementById("questionText");
+      const answersText = document.getElementById("answersText");
+      const engineer = document.getElementById("engineer");
+      const progressBar = document.getElementById("progressBar");
+      const modal = document.getElementById("myModal");
+      const modalText = document.getElementById("modalText");
+      const modalLinkContainer = document.getElementById("modalLink");
+      const closeButton = document.querySelector(".close-button");
+      const feedback = document.getElementById("feedback");
+
+      const emojiMap = { A: "🅰️", B: "🅱️", C: "🅲️", D: "🅳️" };
+
+      document.addEventListener("DOMContentLoaded", () => {
+        questions = JSON.parse(
+          document.getElementById("questionsData").textContent,
+        );
+      });
+
+      startBtn.addEventListener("click", startGame);
+      restartBtn.addEventListener("click", () => {
+        summaryScreen.style.display = "none";
+        startGame();
+      });
+      closeButton.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+      window.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.code === "Space") jump();
+      });
+
+      function showFeedback(isCorrect) {
+        feedback.textContent = isCorrect ? "Correcto" : "Incorrecto";
+        feedback.style.color = isCorrect ? "green" : "red";
+        feedback.style.display = "block";
+        setTimeout(() => {
+          feedback.style.display = "none";
+        }, 2000);
+      }
+
+      function startGame() {
+        startScreen.style.display = "none";
+        summaryScreen.style.display = "none";
+        resetState();
+        showQuestion();
+        spawnOptions();
+        animationFrame = requestAnimationFrame(updateOptions);
+      }
+
+      function resetState() {
+        currentIndex = 0;
+        progress = 0;
+        updateProgress();
+        clearOptions();
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+      }
+
+      function showQuestion() {
+        const q = questions[currentIndex];
+        questionText.innerHTML = `<strong>Pregunta ${currentIndex + 1}:</strong> ${q.question}`;
+        answersText.innerHTML = `A: ${q.answers.A} | B: ${q.answers.B} | C: ${q.answers.C} | D: ${q.answers.D}`;
+      }
+
+      function spawnOptions() {
+        const q = questions[currentIndex];
+        const keys = [...Object.keys(q.answers), "WRENCH"];
+        keys
+          .sort(() => Math.random() - 0.5)
+          .forEach((key, i) => {
+            const el = document.createElement("div");
+            el.className = "option";
+            el.style.left = `${100 + i * 10}vw`;
+            el.style.bottom = "60px";
+            el.innerText = key === "WRENCH" ? "⚙️" : emojiMap[key];
+            options.push({ el, key, position: 100 + i * 10 });
+            gameArea.appendChild(el);
+          });
+      }
+
+      function updateOptions() {
+        const engRect = engineer.getBoundingClientRect();
+        options.forEach((opt, idx) => {
+          opt.position -= 0.5;
+          opt.el.style.left = `${opt.position}vw`;
+          const r = opt.el.getBoundingClientRect();
+          const collision =
+            engRect.bottom > r.top &&
+            engRect.top < r.bottom &&
+            engRect.right > r.left &&
+            engRect.left < r.right;
+          if (collision && jumping) {
+            showCollision(opt.el);
+            if (opt.key === "WRENCH") {
+              const q = questions[currentIndex];
+              modalText.textContent = q.modalMessage;
+              modalLinkContainer.innerHTML = q.modalLink
+                ? `<a href="${q.modalLink.url}" target="_blank">${q.modalLink.text}</a>`
+                : "";
+              modal.style.display = "block";
+              removeOption(idx);
+            } else {
+              selectAnswer(opt.key);
+              clearOptions();
+            }
+          }
+          if (opt.position < -20) removeOption(idx);
+        });
+        if (options.length < 4 && currentIndex < questions.length)
+          spawnOptions();
+        animationFrame = requestAnimationFrame(updateOptions);
+      }
+
+      function selectAnswer(key) {
+        const correct = questions[currentIndex].correct;
+        const isCorrect = key === correct;
+        progress = isCorrect ? progress + 5 : Math.max(0, progress - 5);
+        updateProgress();
+        showFeedback(isCorrect);
+        currentIndex++;
+        if (currentIndex >= questions.length) {
+          setTimeout(endGame, 2000);
+        } else {
+          setTimeout(() => {
+            showQuestion();
+            spawnOptions();
+          }, 2000);
+        }
+      }
+
+      function endGame() {
+        cancelAnimationFrame(animationFrame);
+        summaryText.textContent = `Tu progreso final fue: ${progress}%`;
+        summaryScreen.style.display = "flex";
+      }
+
+      function updateProgress() {
+        progressBar.style.width = `${progress}%`;
+        progressBar.style.backgroundColor =
+          progress < 30 ? "red" : progress < 70 ? "orange" : "green";
+      }
+
+      function jump() {
+        if (jumping) return;
+        jumping = true;
+        engineer.style.bottom = "70px";
+        setTimeout(() => {
+          engineer.style.bottom = "50%";
+          jumping = false;
+        }, 150);
+      }
+
+      function showCollision(el) {
+        const eff = document.createElement("div");
+        eff.className = "collisionEffect";
+        eff.innerText = "💥";
+        const r = el.getBoundingClientRect();
+        eff.style.left = `${r.left}px`;
+        eff.style.top = `${r.top}px`;
+        document.body.appendChild(eff);
+        setTimeout(() => eff.remove(), 500);
+      }
+
+      function clearOptions() {
+        options.forEach((o) => o.el.remove());
+        options = [];
+      }
+
+      function removeOption(idx) {
+        if (options[idx]) {
+          options[idx].el.remove();
+          options.splice(idx, 1);
+        }
+      }
+    </script>
+  </body>
+</html>
